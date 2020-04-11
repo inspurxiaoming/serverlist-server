@@ -19,7 +19,8 @@ server:
   port: 8080
   servlet:
     # 应用的访问路径
-    context-path: /
+    context-path: /library
+#    context-path: /
   tomcat:
     # tomcat的URI编码
     uri-encoding: UTF-8
@@ -27,6 +28,7 @@ server:
     max-threads: 800
     # Tomcat启动初始化的线程数，默认值25
     min-spare-threads: 30
+
 
 # 日志配置
 logging:
@@ -119,3 +121,17 @@ gen:
   autoRemovePre: false
   # 表前缀（生成类名不会包含表前缀，多个用逗号分隔）
   tablePrefix: sys_
+
+#wechat.appid: wx8099953f3ba7d072
+#wechat.secret: 5da2451cc68d32f35bd364389ccd52a1
+#chengym
+#wechat.appid: wx8c0e94d2e3a3d4d4
+#wechat.secret: 10f8d287ee2c99c4b07b03b266515a36
+#\u56FE\u4E66\u5C0F\u7A0B\u5E8F
+#wechat:
+#  appid: wx0c282924427e72d6
+#  secret: 6d0fcb2d6e8502789dd09750f52001b7
+
+wechat:
+  appid: wxe70a1d2ba89f837f
+  secret: 0882f13cbdab48434d01d3256618663e
