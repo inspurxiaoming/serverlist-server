@@ -2,6 +2,7 @@ package com.ruoyi.framework.manager.factory;
 
 import java.util.TimerTask;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.ruoyi.common.constant.Constants;
@@ -21,6 +22,7 @@ import eu.bitwalker.useragentutils.UserAgent;
  *
  * @author ruoyi
  */
+@Slf4j
 public class AsyncFactory {
     private static final Logger sys_user_logger = LoggerFactory.getLogger("sys-user");
 
