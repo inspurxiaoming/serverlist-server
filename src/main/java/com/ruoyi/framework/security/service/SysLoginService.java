@@ -1,22 +1,28 @@
 package com.ruoyi.framework.security.service;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.exception.CustomException;
 import com.ruoyi.common.exception.user.ButtUserNotFoundException;
 import com.ruoyi.common.exception.user.CaptchaException;
 import com.ruoyi.common.exception.user.CaptchaExpireException;
 import com.ruoyi.common.exception.user.UserPasswordNotMatchException;
+import com.ruoyi.common.utils.AesCbcUtil;
 import com.ruoyi.common.utils.MessageUtils;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.common.utils.TimeUtils;
+import com.ruoyi.framework.aspectj.lang.annotation.Log;
 import com.ruoyi.framework.manager.AsyncManager;
 import com.ruoyi.framework.manager.factory.AsyncFactory;
 import com.ruoyi.framework.redis.RedisCache;
 import com.ruoyi.framework.security.LoginUser;
 import com.ruoyi.project.common.HttpClientUtil;
 import com.ruoyi.project.common.JsonUtils;
-import com.ruoyi.project.system.domain.SysButtUser;
-import com.ruoyi.project.system.domain.WXSessionModel;
-import com.ruoyi.project.system.service.impl.UserCodeAuthenticationToken;
+import com.ruoyi.project.system.domain.*;
+import com.ruoyi.project.system.mapper.SysUserButtMapper;
+import com.ruoyi.project.system.service.ISysUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +33,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,6 +51,11 @@ public class SysLoginService {
 
     @Resource
     private AuthenticationManager authenticationManager;
+    @Autowired
+    SysUserButtMapper sysUserButtMapper;
+    @Autowired
+    ISysUserService iSysUserService;
+
 
     @Autowired
     private RedisCache redisCache;
@@ -112,36 +125,8 @@ public class SysLoginService {
                 throw e;
             }
         }
-
-//                //然后生成本系统的token
-//        String verifyKey = Constants.CAPTCHA_CODE_KEY + model.getOpenid();
-//        String captcha = redisCache.getCacheObject(verifyKey);
-//        redisCache.deleteObject(verifyKey);
-//        if (captcha == null) {
-//            AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.expire")));
-//            throw new CaptchaExpireException();
-//        }
-//        if (!code.equalsIgnoreCase(captcha)) {
-//            AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.error")));
-//            throw new CaptchaException();
-//        }
-        // 用户验证
-        Authentication authentication = null;
-        try {
-            // 该方法会去调用UserDetailsServiceImpl.loadUserByUsername
-            authentication = authenticationManager
-                    .authenticate(new UserCodeAuthenticationToken(sysButtUser, model));
-        } catch (Exception e) {
-            if (e instanceof BadCredentialsException) {
-                AsyncManager.me().execute(AsyncFactory.recordLogininfor(sysButtUser.getUserId(), Constants.LOGIN_FAIL, MessageUtils.message("user.password.not.match")));
-                throw new UserPasswordNotMatchException();
-            } else {
-                AsyncManager.me().execute(AsyncFactory.recordLogininfor(sysButtUser.getUserId(), Constants.LOGIN_FAIL, e.getMessage()));
-                throw new CustomException(e.getMessage());
-            }
-        }
-        AsyncManager.me().execute(AsyncFactory.recordLogininfor(model.getOpenid(), Constants.LOGIN_SUCCESS, MessageUtils.message("user.login.success")));
-        LoginUser loginUser = (LoginUser) authentication.getPrincipal();
+        //查询用户是否存在，有用户则查询用户的信息；没有用户则为用户注册账号，并生成token。
+        LoginUser loginUser = checkUserforWX(model,sysButtUser);
         // 生成token
         return tokenService.createToken(loginUser);
     }
@@ -164,5 +149,86 @@ public class SysLoginService {
         log.info("++##userModel-session_key:{}", model != null ? model.getSession_key() : "");
         log.info("++##userModel-openid:{}", model != null ? model.getOpenid() : "");
         return model;
+    }
+
+    /**
+     * 查询用户信息，判断用户是否存在，用户存在的情况下，查询用户信息，用户信息不存在的情况下，注册账号，生成用户信息。
+     * @param model
+     * @param sysButtUser
+     * @return
+     */
+    private  LoginUser checkUserforWX(WXSessionModel model, SysButtUser sysButtUser){
+        //根据sysButtUser判断用户类型，确定查询哪些表，然后
+        SysUserButt sysUserButt = sysUserButtMapper.selectById(model.getOpenid());
+        if(sysUserButt!=null){
+            SysUser sysUser = new SysUser();
+            sysUser.getNickName();
+            sysUser.setCreateBy("user-wechat");
+            int row = iSysUserService.insertUser(sysUser);
+            if(row>0){
+                sysUserButt.setId(model.getOpenid());
+                sysUserButt.setUserId(String.valueOf(sysUser.getUserId()));
+                try{
+                     getUserInfo(sysButtUser,model,sysUserButt);
+                }catch (Exception e){
+
+                }
+            }
+        }
+        LoginUser loginUser = new LoginUser();
+        return new LoginUser();
+
+    }
+    private SysUserButt getUserInfo(SysButtUser sysButtUser, WXSessionModel model,SysUserButt sysUserButt) throws Exception {
+        String decodeEncryptedData = decode(sysButtUser.getEncryptedData());
+        String userInfo = null;
+        String userOpenId = model.getOpenid();
+        String sessionKey = model.getSession_key();
+        decodeEncryptedData = decodeEncryptedData.replaceAll(" ","\\+");
+        userInfo = AesCbcUtil.decrypt(decodeEncryptedData, sessionKey, sysButtUser.getIv(), "UTF-8");
+        log.info("uuuuuserInfo{}",userInfo);
+        if (org.apache.commons.lang3.StringUtils.isNotEmpty(userInfo)) {
+            Map<String, String> userInfoMap = (new ObjectMapper()).readValue(userInfo, Map.class);
+            sysUserButt = getUserInfo(userOpenId,userInfoMap,sysButtUser);
+            sysUserButtMapper.insert(sysUserButt);
+        }
+        return sysUserButt;
+    }
+    private String decode(String url){
+        try {
+            String prevURL="";
+            String decodeURL=url;
+            while(!prevURL.equals(decodeURL))
+            {
+                prevURL=decodeURL;
+                decodeURL= URLDecoder.decode( decodeURL, "UTF-8" );
+            }
+            return decodeURL;
+        } catch (UnsupportedEncodingException e) {
+            return "Issue while decoding" +e.getMessage();
+        }
+    }
+    public SysUserButt getUserInfo(String userOpenId, Map<String, String> userInfoMap, SysButtUser sysButtUser){
+        SysUserButt user = new SysUserButt();
+        user.setId(userOpenId);
+        user.setPhone(userInfoMap.get("phoneNumber"));
+        user.setName(sysButtUser.getWxUserInfo().getNickName());
+        user.setUserId(sysButtUser.getUserId());
+        //正常环境用户角色设置
+        user.setRoles("user");
+        //审核环境用户角色设置
+//            user.setRoles(CommonConstants.USER_ROLES_ADMIN);
+        user.setCreatedTime(TimeUtils.longToDate(System.currentTimeMillis()));
+        if(org.apache.commons.lang3.StringUtils.isNoneEmpty(sysButtUser.getRawData())){
+            sysButtUser.setWxUserInfo(getUserFromRawData(sysButtUser.getRawData()));
+        }
+        user.setAvatarUrl(sysButtUser.getWxUserInfo().getAvatarUrl());
+        user.setSource(1);
+        return user;
+    }
+    public WXUserInfo getUserFromRawData(String rawData){
+        JSONObject jsonObj = (JSONObject) JSON.parse(rawData);
+        WXUserInfo userInfo= JSONObject.toJavaObject(jsonObj,WXUserInfo.class);
+        return userInfo;
     }
 }
