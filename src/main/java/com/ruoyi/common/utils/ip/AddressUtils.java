@@ -48,7 +48,6 @@ public class AddressUtils {
                 String region = obj.getString("region");
                 String city = obj.getString("city");
                 address = country +" "+ region + " " + city;
-                log.info(address);
 //            }
         }
         return address;

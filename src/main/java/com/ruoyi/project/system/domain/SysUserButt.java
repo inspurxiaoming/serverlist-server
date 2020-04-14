@@ -23,7 +23,7 @@ public class SysUserButt implements Serializable {
   private Date createdTime;
   private int source;
   private String jobNumber;
-  private String userId;
+  private Long userId;
   private String status;
 
   @Override

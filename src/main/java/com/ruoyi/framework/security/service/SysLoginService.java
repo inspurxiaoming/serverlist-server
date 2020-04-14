@@ -126,9 +126,9 @@ public class SysLoginService {
             }
         }
         //查询用户是否存在，有用户则查询用户的信息；没有用户则为用户注册账号，并生成token。
-        LoginUser loginUser = checkUserforWX(model,sysButtUser);
+//        LoginUser loginUser = checkUserforWX(model,sysButtUser);
         // 生成token
-        return tokenService.createToken(loginUser);
+        return tokenService.createToken(checkUserforWX(model,sysButtUser));
     }
     private WXSessionModel getWXSessionModel(SysButtUser sysButtUser){
         String url = "https://api.weixin.qq.com/sns/jscode2session";
@@ -160,8 +160,9 @@ public class SysLoginService {
     private  LoginUser checkUserforWX(WXSessionModel model, SysButtUser sysButtUser){
         //根据sysButtUser判断用户类型，确定查询哪些表，然后
         SysUserButt sysUserButt = sysUserButtMapper.selectById(model.getOpenid());
+        SysUser sysUser = new SysUser();
         if(sysUserButt!=null){
-
+            sysUser = iSysUserService.selectUserById(sysUserButt.getUserId());
         }else{
             try{
                 sysUserButt = getUserInfo(sysButtUser,model,sysUserButt);
@@ -169,7 +170,6 @@ public class SysLoginService {
                 log.error("error {}",e);
 //                e.printStackTrace();
             }
-            SysUser sysUser = new SysUser();
             sysUser.setUserName(sysButtUser.getChannel()+model.getOpenid());
             log.info("sysUserButt  {}",sysUserButt.toString());
             sysUser.setCreateBy("user-wechat");
@@ -177,13 +177,14 @@ public class SysLoginService {
             int row = iSysUserService.insertUser(sysUser);
             if(row>0){
                 sysUserButt.setId(model.getOpenid());
-                sysUserButt.setUserId(String.valueOf(sysUser.getUserId()));
+                sysUserButt.setUserId(sysUser.getUserId());
                 log.info("start insert sysUserButt from wechat");
                 sysUserButtMapper.insert(sysUserButt);
             }
         }
         LoginUser loginUser = new LoginUser();
-        return new LoginUser();
+        loginUser.setUser(sysUser);
+        return loginUser;
 
     }
     private SysUserButt getUserInfo(SysButtUser sysButtUser, WXSessionModel model,SysUserButt sysUserButt) throws Exception {

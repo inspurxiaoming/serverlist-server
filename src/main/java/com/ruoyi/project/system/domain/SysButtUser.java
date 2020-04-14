@@ -28,7 +28,7 @@ public class SysButtUser extends BaseEntity {
     private String iv;
     private WXUserInfo userInfo;
     private String rawData;
-    private String userId;
+    private Long userId;
     private String channel;
 
     @Override

@@ -111,6 +111,7 @@ public class TokenService
 
         Map<String, Object> claims = new HashMap<>();
         claims.put(Constants.LOGIN_USER_KEY, token);
+        log.info(token);
         return createToken(claims);
     }
 
