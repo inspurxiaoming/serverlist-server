@@ -26,7 +26,7 @@ public class SysButtUser extends BaseEntity {
     private String code;
     private String encryptedData;
     private String iv;
-    private WXUserInfo wxUserInfo;
+    private WXUserInfo userInfo;
     private String rawData;
     private String userId;
     private String channel;
@@ -37,7 +37,7 @@ public class SysButtUser extends BaseEntity {
                 "code='" + code + '\'' +
                 ", encryptedData='" + encryptedData + '\'' +
                 ", iv='" + iv + '\'' +
-                ", wxUserInfo=" + wxUserInfo +
+                ", wxUserInfo=" + userInfo +
                 ", rawData='" + rawData + '\'' +
                 ", userId='" + userId + '\'' +
                 ", channel='" + channel + '\'' +

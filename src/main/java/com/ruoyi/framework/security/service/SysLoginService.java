@@ -161,18 +161,25 @@ public class SysLoginService {
         //根据sysButtUser判断用户类型，确定查询哪些表，然后
         SysUserButt sysUserButt = sysUserButtMapper.selectById(model.getOpenid());
         if(sysUserButt!=null){
+
+        }else{
+            try{
+                sysUserButt = getUserInfo(sysButtUser,model,sysUserButt);
+            } catch (Exception e) {
+                log.error("error {}",e);
+//                e.printStackTrace();
+            }
             SysUser sysUser = new SysUser();
-            sysUser.getNickName();
+            sysUser.setUserName(sysButtUser.getChannel()+model.getOpenid());
+            log.info("sysUserButt  {}",sysUserButt.toString());
             sysUser.setCreateBy("user-wechat");
+            sysUser.setNickName(sysUserButt.getName());
             int row = iSysUserService.insertUser(sysUser);
             if(row>0){
                 sysUserButt.setId(model.getOpenid());
                 sysUserButt.setUserId(String.valueOf(sysUser.getUserId()));
-                try{
-                     getUserInfo(sysButtUser,model,sysUserButt);
-                }catch (Exception e){
-
-                }
+                log.info("start insert sysUserButt from wechat");
+                sysUserButtMapper.insert(sysUserButt);
             }
         }
         LoginUser loginUser = new LoginUser();
@@ -190,7 +197,7 @@ public class SysLoginService {
         if (org.apache.commons.lang3.StringUtils.isNotEmpty(userInfo)) {
             Map<String, String> userInfoMap = (new ObjectMapper()).readValue(userInfo, Map.class);
             sysUserButt = getUserInfo(userOpenId,userInfoMap,sysButtUser);
-            sysUserButtMapper.insert(sysUserButt);
+
         }
         return sysUserButt;
     }
@@ -209,22 +216,23 @@ public class SysLoginService {
         }
     }
     public SysUserButt getUserInfo(String userOpenId, Map<String, String> userInfoMap, SysButtUser sysButtUser){
-        SysUserButt user = new SysUserButt();
-        user.setId(userOpenId);
-        user.setPhone(userInfoMap.get("phoneNumber"));
-        user.setName(sysButtUser.getWxUserInfo().getNickName());
-        user.setUserId(sysButtUser.getUserId());
+        log.info("start package SysUserButt");
+        SysUserButt sysUserButt = new SysUserButt();
+        sysUserButt.setId(userOpenId);
+        sysUserButt.setPhone(userInfoMap.get("phoneNumber"));
+        sysUserButt.setName(sysButtUser.getUserInfo().getNickName());
+        sysUserButt.setUserId(sysButtUser.getUserId());
         //正常环境用户角色设置
-        user.setRoles("user");
+        sysUserButt.setRoles("user");
         //审核环境用户角色设置
 //            user.setRoles(CommonConstants.USER_ROLES_ADMIN);
-        user.setCreatedTime(TimeUtils.longToDate(System.currentTimeMillis()));
+        sysUserButt.setCreatedTime(TimeUtils.longToDate(System.currentTimeMillis()));
         if(org.apache.commons.lang3.StringUtils.isNoneEmpty(sysButtUser.getRawData())){
-            sysButtUser.setWxUserInfo(getUserFromRawData(sysButtUser.getRawData()));
+            sysButtUser.setUserInfo(getUserFromRawData(sysButtUser.getRawData()));
         }
-        user.setAvatarUrl(sysButtUser.getWxUserInfo().getAvatarUrl());
-        user.setSource(1);
-        return user;
+        sysUserButt.setAvatarUrl(sysButtUser.getUserInfo().getAvatarUrl());
+        sysUserButt.setSource(1);
+        return sysUserButt;
     }
     public WXUserInfo getUserFromRawData(String rawData){
         JSONObject jsonObj = (JSONObject) JSON.parse(rawData);
