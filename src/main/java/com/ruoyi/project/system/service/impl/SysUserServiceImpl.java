@@ -268,7 +268,7 @@ public class SysUserServiceImpl implements ISysUserService
     /**
      * 修改用户头像
      * 
-     * @param userId 用户ID
+     * @param userName 用户ID
      * @param avatar 头像地址
      * @return 结果
      */

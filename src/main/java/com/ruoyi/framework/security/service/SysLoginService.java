@@ -9,10 +9,7 @@ import com.ruoyi.common.exception.user.ButtUserNotFoundException;
 import com.ruoyi.common.exception.user.CaptchaException;
 import com.ruoyi.common.exception.user.CaptchaExpireException;
 import com.ruoyi.common.exception.user.UserPasswordNotMatchException;
-import com.ruoyi.common.utils.AesCbcUtil;
-import com.ruoyi.common.utils.MessageUtils;
-import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.common.utils.TimeUtils;
+import com.ruoyi.common.utils.*;
 import com.ruoyi.framework.aspectj.lang.annotation.Log;
 import com.ruoyi.framework.manager.AsyncManager;
 import com.ruoyi.framework.manager.factory.AsyncFactory;
@@ -118,7 +115,8 @@ public class SysLoginService {
         if(sysButtUser==null){
             throw new CustomException("错误的请求");
         }
-        if(StringUtils.isNotEmpty(sysButtUser.getChannel())&&"wechat".equals(sysButtUser.getChannel())){
+
+        if(StringUtils.isNotEmpty(sysButtUser.getChannel())&& CommonConstants.REGIST_CHANNEL_WECHAT.equals(sysButtUser.getChannel())){
             try {
                 model = getWXSessionModel(sysButtUser);
             }catch(Exception e){
@@ -174,6 +172,7 @@ public class SysLoginService {
             log.info("sysUserButt  {}",sysUserButt.toString());
             sysUser.setCreateBy("user-wechat");
             sysUser.setNickName(sysUserButt.getName());
+//            sysUser.setRoleIds();
             int row = iSysUserService.insertUser(sysUser);
             if(row>0){
                 sysUserButt.setId(model.getOpenid());
