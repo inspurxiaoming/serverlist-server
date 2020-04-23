@@ -58,6 +58,10 @@ public class BaseController
             PageHelper.startPage(pageNum, pageSize, orderBy);
         }
     }
+    public PageDomain pageMessage(){
+        return  TableSupport.buildPageRequest();
+    }
+
 
     /**
      * 响应请求分页数据

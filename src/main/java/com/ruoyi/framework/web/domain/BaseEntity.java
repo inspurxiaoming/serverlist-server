@@ -23,7 +23,7 @@ public class BaseEntity implements Serializable
     private String createBy;
 
     /** 创建时间 */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private Date createTime;
 
     /** 更新者 */
@@ -70,6 +70,7 @@ public class BaseEntity implements Serializable
         this.createBy = createBy;
     }
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     public Date getCreateTime()
     {
         return createTime;
