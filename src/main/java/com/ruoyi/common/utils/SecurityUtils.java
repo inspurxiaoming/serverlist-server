@@ -42,6 +42,11 @@ public class SecurityUtils {
             throw new CustomException("获取用户信息异常", HttpStatus.UNAUTHORIZED);
         }
     }
+    public static Long getDeptID(){
+
+        return getLoginUser().getUser().getDeptId();
+    }
+
 
     /**
      * 获取Authentication

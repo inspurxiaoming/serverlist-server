@@ -7,13 +7,15 @@ import com.ruoyi.framework.web.domain.BaseEntity;
 import com.ruoyi.framework.web.page.PageDomain;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.Date;
 
 @Data
-public class RegionVO extends PageDomain {
+public class RegionVO extends PageDomain implements Serializable {
 
   private String id;
   private String cloudCenter;
+  private String cloudCenterName;
   private String name;
   private boolean status;
 
@@ -23,6 +25,8 @@ public class RegionVO extends PageDomain {
   private Date updateTime;
   private Long createBy;
   private Long updateBy;
+  private Long selectUser;
+  private boolean isadmin;
 
 
 }

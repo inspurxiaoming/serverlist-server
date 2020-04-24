@@ -6,6 +6,9 @@ import com.ruoyi.framework.web.page.PageDomain;
 import com.ruoyi.framework.web.page.TableDataInfo;
 import com.ruoyi.project.cloudcenter.domain.RegionVO;
 import com.ruoyi.project.common.OwnRestTemplate;
+import com.ruoyi.project.system.domain.SysDept;
+import com.ruoyi.project.system.domain.SysUser;
+import com.ruoyi.project.system.service.ISysDeptService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -27,6 +30,8 @@ public class RegionService {
 
     @Autowired
     OwnRestTemplate ownRestTemplate;
+    @Autowired
+    ISysDeptService iSysDeptService;
 
     public AjaxResult insert(RegionVO regionVO) {
         ResponseEntity<RegionVO> responseEntity = ownRestTemplate.exchangeWithOutAuth("http://localhost:8021/neo4j/config/region", HttpMethod.POST, regionVO, AjaxResult.class, regionVO);
@@ -36,12 +41,13 @@ public class RegionService {
     public TableDataInfo getAll(PageDomain page, RegionVO regionVO) {
         regionVO.setPageNum(page.getPageNum());
         regionVO.setPageSize(page.getPageSize());
-//        regionVO.setIsAsc(page.getIsAsc());
-//        regionVO.setOrderByColumn(page.getOrderByColumn());
-//        ResponseEntity<TableDataInfo> responseEntity =  ownRestTemplate.exchangeWithOutAuth("http://localhost:8021/neo4j/config/region/list",HttpMethod.GET,regionVO,TableDataInfo.class,regionVO);
+        regionVO.setIsadmin(SysUser.isAdmin(regionVO.getSelectUser()));
         String param = "?pageNum=" + regionVO.getPageNum() + "&pageSize=" + regionVO.getPageSize();
+        MultiValueMap<String,RegionVO> map = new LinkedMultiValueMap<>();
+        map.set("regionVO",regionVO);
+        ResponseEntity<TableDataInfo<RegionVO>> responseEntity =  ownRestTemplate.exchangeWithOutAuth("http://localhost:8021/neo4j/config/region/list" + param,HttpMethod.GET,map,TableDataInfo.class,regionVO);
+        List<RegionVO> list = (List<RegionVO>) responseEntity.getBody().getRows();
 
-        ResponseEntity<TableDataInfo> responseEntity = ownRestTemplate.getForEntity("http://localhost:8021/neo4j/config/region/list" + param, TableDataInfo.class, regionVO);
         return responseEntity.getBody();
     }
 

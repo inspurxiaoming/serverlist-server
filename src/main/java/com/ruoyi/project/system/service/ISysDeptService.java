@@ -19,6 +19,8 @@ public interface ISysDeptService
      */
     public List<SysDept> selectDeptList(SysDept dept);
 
+    public List<SysDept> selectAll();
+
     /**
      * 构建前端所需要树结构
      * 

@@ -1,5 +1,7 @@
 package com.ruoyi.project.common;
 
+import com.ruoyi.common.utils.SecurityUtils;
+import com.ruoyi.project.system.domain.SysUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -71,6 +73,9 @@ public class OwnRestTemplate<T> extends RestTemplate {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Accept", MediaType.APPLICATION_JSON_VALUE);
         httpHeaders.add("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpHeaders.add("isAdmin", String.valueOf(SysUser.isAdmin(SecurityUtils.getUserId())));
+        httpHeaders.add("userId", String.valueOf(SecurityUtils.getUserId()));
+        httpHeaders.add("cloudCenter",String.valueOf(SecurityUtils.getDeptID()));
         return httpHeaders;
     }
 }

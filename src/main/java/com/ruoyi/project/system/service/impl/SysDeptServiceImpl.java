@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.ruoyi.framework.web.domain.server.Sys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.common.constant.UserConstants;
@@ -39,6 +41,10 @@ public class SysDeptServiceImpl implements ISysDeptService
         return deptMapper.selectDeptList(dept);
     }
 
+    @Override
+    public List<SysDept> selectAll(){
+        return deptMapper.selectAll();
+    }
     /**
      * 构建前端所需要树结构
      * 

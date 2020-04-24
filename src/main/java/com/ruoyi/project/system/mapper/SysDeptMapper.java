@@ -19,6 +19,8 @@ public interface SysDeptMapper
      */
     public List<SysDept> selectDeptList(SysDept dept);
 
+    public List<SysDept> selectAll();
+
     /**
      * 根据角色ID查询部门树信息
      * 
