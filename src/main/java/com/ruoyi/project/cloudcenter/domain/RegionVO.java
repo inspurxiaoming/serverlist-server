@@ -14,7 +14,7 @@ import java.util.Date;
 public class RegionVO extends PageDomain implements Serializable {
 
   private String id;
-  private String cloudCenter;
+  private Long cloudCenter;
   private String cloudCenterName;
   private String name;
   private boolean status;

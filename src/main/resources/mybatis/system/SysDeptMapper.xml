@@ -152,5 +152,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<delete id="deleteDeptById" parameterType="Long">
 		update sys_dept set del_flag = '2' where dept_id = #{deptId}
 	</delete>
-
-</mapper> 
+	<select id="selectDeptByUserIdAndRole" resultMap="SysDeptResult">
+		select roledept.* from sys_user_role user
+		LEFT JOIN
+		(select sysroledept.*,dept.dept_name from sys_role_dept sysroledept
+		  left JOIN sys_dept dept on sysroledept.dept_id = dept.dept_id
+		 where  dept.del_flag = '0') roledept
+		 on user.role_id = roledept.role_id
+		 where user.user_id =#{userId};
+	</select>
+</mapper>

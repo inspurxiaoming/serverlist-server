@@ -6,6 +6,7 @@ import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.framework.web.page.TableDataInfo;
 import com.ruoyi.project.cloudcenter.domain.RegionVO;
 import com.ruoyi.project.cloudcenter.service.RegionService;
+import com.ruoyi.project.system.domain.SysDept;
 import com.ruoyi.project.system.domain.SysUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,6 +19,7 @@ import javax.swing.plaf.synth.Region;
 public class CloudCenterController extends BaseController {
     @Autowired
     RegionService regionService;
+
 
 //    @PreAuthorize("@ss.hasPermi('project:region:add')")
 //    @PreAuthorize("@ss.hasPermi('system:config:add')")
@@ -32,6 +34,17 @@ public class CloudCenterController extends BaseController {
         regionVO.setSelectUser(SecurityUtils.getUserId());
         return regionService.getAll(pageMessage(),regionVO);
     }
+    @PreAuthorize("@ss.hasPermi('cloudcenter:region:list')")
+    @GetMapping("/region/{id}")
+    public AjaxResult getById(@PathVariable String id){
+        return regionService.getById(id);
+    }
+    @PreAuthorize("@ss.hasPermi('cloudcenter:region:list')")
+    @GetMapping("/region/cloudcenter/list")
+    public AjaxResult getCloudCenter( SysDept dept){
+        return regionService.getCloudCenter(dept);
+    }
+
 //    @GetMapping("/region/list")
 //    public AjaxResult getAll(){
 //        return AjaxResult.success(regionService.getall());

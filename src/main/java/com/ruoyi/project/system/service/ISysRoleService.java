@@ -2,6 +2,8 @@ package com.ruoyi.project.system.service;
 
 import java.util.List;
 import java.util.Set;
+
+import com.ruoyi.project.system.domain.SysDept;
 import com.ruoyi.project.system.domain.SysRole;
 
 /**
@@ -128,4 +130,6 @@ public interface ISysRoleService
      * @return 结果
      */
     public int deleteRoleByIds(Long[] roleIds);
+
+
 }

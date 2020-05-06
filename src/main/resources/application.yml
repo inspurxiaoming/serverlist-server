@@ -152,3 +152,11 @@ gen:
 wechat:
   appid: wxe70a1d2ba89f837f
   secret: 0882f13cbdab48434d01d3256618663e
+
+device:
+  domain: http://localhost:8021/neo4j
+  config:
+    region:
+      list: /config/region/list
+      insert: /config/region
+      queryOne: /config/region/%s
