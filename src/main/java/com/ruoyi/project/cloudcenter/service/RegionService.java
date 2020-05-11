@@ -78,5 +78,10 @@ public class RegionService {
         return ajaxResult;
     }
 
+    public AjaxResult delete(String[] ids) {
+        ResponseEntity<AjaxResult> responseEntity =  ownRestTemplate.exchangeWithOutAuth(domain+String.format(queryOneUri,ids),HttpMethod.DELETE,ids,AjaxResult.class,ids);
+        AjaxResult ajaxResult = responseEntity.getBody();
+        return ajaxResult;
+    }
 
 }

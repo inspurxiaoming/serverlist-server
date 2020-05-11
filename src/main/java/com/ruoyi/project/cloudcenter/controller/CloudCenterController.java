@@ -23,6 +23,7 @@ public class CloudCenterController extends BaseController {
 
 //    @PreAuthorize("@ss.hasPermi('project:region:add')")
 //    @PreAuthorize("@ss.hasPermi('system:config:add')")
+    @PreAuthorize("@ss.hasPermi('cloudcenter:region:add')")
     @PostMapping("/region")
     public AjaxResult insertRegion(@RequestBody RegionVO regionVO){
         regionVO.setCreateBy(SecurityUtils.getUserId());
@@ -40,11 +41,18 @@ public class CloudCenterController extends BaseController {
         return regionService.getById(id);
     }
     @PreAuthorize("@ss.hasPermi('cloudcenter:region:list')")
+    @DeleteMapping("/region/{ids}")
+    public AjaxResult delete(@PathVariable String[] ids){
+        return regionService.delete(ids);
+    }
+
+
+
+    @PreAuthorize("@ss.hasPermi('cloudcenter:region:list')")
     @GetMapping("/region/cloudcenter/list")
     public AjaxResult getCloudCenter( SysDept dept){
         return regionService.getCloudCenter(dept);
     }
-
 //    @GetMapping("/region/list")
 //    public AjaxResult getAll(){
 //        return AjaxResult.success(regionService.getall());
